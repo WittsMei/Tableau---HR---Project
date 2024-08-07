@@ -76,16 +76,16 @@ from faker import Faker
 from datetime import datetime, timedelta
 import random
 
-####### Initialize Faker
+# Initialize Faker
 fake = Faker('en_US')
 Faker.seed(42)
 np.random.seed(42)
 random.seed(42)
 
-####### Configuration
+# Configuration
 num_records = 8950
 
-####### States & Cities
+# States & Cities
 states_cities = {
     'New York': ['New York City', 'Buffalo', 'Rochester'],
     'Virginia': ['Virginia Beach', 'Norfolk', 'Richmond'],
@@ -101,7 +101,7 @@ state_prob = [0.7, 0.02, 0.01, 0.03, 0.05, 0.03, 0.05, 0.11]
 assigned_states = np.random.choice(states, size=num_records, p=state_prob)
 assigned_cities = [np.random.choice(states_cities[state]) for state in assigned_states]
 
-####### Departments & Jobtitles
+# Departments & Jobtitles
 departments = ['HR', 'IT', 'Sales', 'Marketing', 'Finance', 'Operations', 'Customer Service']
 departments_prob = [0.02, 0.15, 0.21, 0.08, 0.05, 0.30, 0.19]
 jobtitles = {
@@ -123,7 +123,7 @@ jobtitles_prob = {
     'Customer Service': [0.04, 0.3, 0.38, 0.28]  # Customer Service Manager, Customer Service Representative, Support Specialist, Help Desk Technician
 }
 
-####### Educations
+# Educations
 educations = ['High School', "Bachelor", "Master", 'PhD']
 
 education_mapping = {
@@ -158,8 +158,8 @@ education_mapping = {
     'Help Desk Technician': ["High School", "Bachelor"]
 }
 
-####### Hiring Date
-####### Define custom probability weights for each year
+# Hiring Date
+# Define custom probability weights for each year
 year_weights = {
     2015: 5,   # 15% probability
     2016: 8,   # 15% probability
@@ -174,7 +174,7 @@ year_weights = {
 }
 
 
-####### Generate a random date based on custom probabilities
+# Generate a random date based on custom probabilities
 def generate_custom_date(year_weights):
     year = random.choices(list(year_weights.keys()), weights=list(year_weights.values()))[0]
     month = random.randint(1, 12)
@@ -228,7 +228,7 @@ def generate_salary(department, job_title):
         }
     return salary_dict[department][job_title]
 
-####### Generate the dataset
+# Generate the dataset
 data = []
 
 for _ in range(num_records):
@@ -263,7 +263,7 @@ for _ in range(num_records):
         overtime
     ])
 
-####### Create DataFrame
+## Create DataFrame
 columns = [
      'employee_id',
      'first_name',
@@ -283,7 +283,7 @@ columns = [
 
 df = pd.DataFrame(data, columns=columns)
 
-####### Add Birthdate
+# Add Birthdate
 def generate_birthdate(row):
     age_distribution = {
         'under_25': 0.11,
@@ -314,11 +314,11 @@ def generate_birthdate(row):
     birthdate = fake.date_of_birth(minimum_age=age, maximum_age=age)
     return birthdate
 
-####### Apply the function to generate birthdates
+# Apply the function to generate birthdates
 df['birthdate'] = df.apply(generate_birthdate, axis=1)
 
-####### Terminations
-####### Define termination distribution
+# Terminations
+# Define termination distribution
 year_weights = {
     2015: 5,
     2016: 7,
@@ -332,30 +332,30 @@ year_weights = {
     2024: 10
 }
 
-####### Calculate the total number of terminated employees
+# Calculate the total number of terminated employees
 total_employees = num_records
 termination_percentage = 0.112  # 11.2%
 total_terminated = int(total_employees * termination_percentage)
 
-####### Generate termination dates based on distribution
+# Generate termination dates based on distribution
 termination_dates = []
 for year, weight in year_weights.items():
     num_terminations = int(total_terminated * (weight / 100))
     termination_dates.extend([year] * num_terminations)
 
-####### Randomly shuffle the termination dates
+# Randomly shuffle the termination dates
 random.shuffle(termination_dates)
 
-####### Assign termination dates to terminated employees
+# Assign termination dates to terminated employees
 terminated_indices = df.index[:total_terminated]
 for i, year in enumerate(termination_dates[:total_terminated]):
     df.at[terminated_indices[i], 'termdate'] = datetime(year, 1, 1) + timedelta(days=random.randint(0, 365))
 
 
-####### Assign None to termdate for employees who are not terminated
+# Assign None to termdate for employees who are not terminated
 df['termdate'] = df['termdate'].where(df['termdate'].notnull(), None)
 
-####### Ensure termdate is at least 6 months after hiredat
+# Ensure termdate is at least 6 months after hiredat
 df['termdate'] = df.apply(lambda row: row['hiredate'] + timedelta(days=180) if row['termdate'] and row['termdate'] < row['hiredate'] + timedelta(days=180) else row['termdate'], axis=1)
 
 education_multiplier = {
@@ -366,13 +366,13 @@ education_multiplier = {
 }
 
 
-####### Function to calculate age from birthdate
+# Function to calculate age from birthdate
 def calculate_age(birthdate):
     today = pd.Timestamp('today')
     age = today.year - birthdate.year - ((today.month, today.day) < (birthdate.month, birthdate.day))
     return age
 
-####### Function to calculate the adjusted salary
+# Function to calculate the adjusted salary
 def calculate_adjusted_salary(row):
     base_salary = row['salary']
     gender = row['gender']
@@ -393,7 +393,7 @@ def calculate_adjusted_salary(row):
     # Round the adjusted salary to the nearest integer
     return round(adjusted_salary)
 
-####### Apply the function to the DataFrame
+# Apply the function to the DataFrame
 df['salary'] = df.apply(calculate_adjusted_salary, axis=1)
 
 # Convert 'hiredate' and 'birthdate' to datetime
@@ -403,9 +403,5 @@ df['termdate'] = pd.to_datetime(df['termdate']).dt.date
 
 print(df)
 
-####### Save to CSV
+# Save to CSV
 df.to_csv('HumanResources.csv', index=False)
-
-
-
-
