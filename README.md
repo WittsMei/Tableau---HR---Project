@@ -42,5 +42,7 @@ The income analysis section should focus on salary-related metrics, including:
 <img width="1599" alt="image" src="https://github.com/user-attachments/assets/6d5e9021-9152-4e4f-9aed-0adbf7f95c41">
 
 
+To access the overall dashboard, click [here](https://public.tableau.com/app/profile/witts.jianming.mei/viz/HRDashboardOverview_17222442611830/HRDashboard).
+
 
 
